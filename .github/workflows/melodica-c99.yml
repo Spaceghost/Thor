@@ -1,0 +1,34 @@
+name: Thor C99 bring-up
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parser-and-fixture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Thor
+        run: make -j2 DEBUG=1
+
+      - name: Parse Codin's melodica acceptance fixture
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./thor test/c99/melodica.odin > "$RUNNER_TEMP/melodica.ast"
+          test -s "$RUNNER_TEMP/melodica.ast"
+          cat "$RUNNER_TEMP/melodica.ast"
+
+      - name: Sanitizer parser pass
+        shell: bash
+        run: |
+          set -euxo pipefail
+          make clean
+          make -j2 DEBUG=1 ASAN=1 UBSAN=1
+          ASAN_OPTIONS=detect_leaks=1 ./thor test/c99/melodica.odin > /dev/null
