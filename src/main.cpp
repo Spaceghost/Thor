@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "util/system.h"
 #include "util/file.h"
 #include "util/map.h"
@@ -19,7 +21,7 @@ namespace Thor {
 
 using namespace Thor;
 
-int main(int, char **) {
+int main(int argc, char **argv) {
 	System sys {
 		STD_FILESYSTEM,
 		STD_HEAP,
@@ -30,8 +32,12 @@ int main(int, char **) {
 		STD_CHRONO,
 	};
 
+	StringView filename { "test/ks.odin" };
+	if (argc > 1) {
+		filename = StringView { argv[1], strlen(argv[1]) };
+	}
 
-	auto parser = Parser::open(sys, "test/ks.odin");
+	auto parser = Parser::open(sys, filename);
 	if (!parser) {
 		return 1;
 	}
